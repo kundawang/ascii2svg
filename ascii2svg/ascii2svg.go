@@ -15,10 +15,27 @@ const template = `<?xml version="1.0" encoding="UTF-8"?>
       </div>
     </foreignObject>
   </g>
-</svg>`
+%s</svg>`
 
 func FromString(input string) (string, error) {
+	return FromStringWithOptions(input, DefaultOptions())
+}
+
+// FromStringWithOptions renders input like FromString and overlays an
+// independent direction-connection layer whose line color, width and
+// geometry come from opts. When no direction line is recognized, the output
+// stays identical to the original default rendering.
+func FromStringWithOptions(input string, opts Options) (string, error) {
 	escapedInput := html.EscapeString(input)
-	out := fmt.Sprintf(template, escapedInput)
-	return out, nil
+
+	paths, err := ExtractDirections(input, opts)
+	if err != nil {
+		return "", err
+	}
+	layer := ""
+	if len(paths) > 0 {
+		layer = RenderDirectionLayer(paths, opts)
+	}
+
+	return fmt.Sprintf(template, escapedInput, layer), nil
 }

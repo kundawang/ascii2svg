@@ -40,6 +40,41 @@ Security reports are greatly appreciated and I will publicly thank you for it, a
 </svg>
 ```
 
+## Direction-connection layer
+
+Besides the default `<pre>` rendering, ascii2svg recognizes horizontal
+(`-`) and vertical (`|`) direction lines with arrow ends (`<`, `>`, `^`,
+`v`, `V`) and overlays them as an **independent, separately styleable SVG
+layer** (`<g class="a2s-directions">`). Each polyline becomes its own
+`<path>` with optional `marker-start` / `marker-end` arrow heads, so the
+connection styling can be adjusted without touching the source text.
+
+- `+` joins lines at corners, forks and crossings; these stay connected.
+- Only arrow-headed lines reach the layer: plain text, isolated brackets,
+  arrow-less dangling lines and closed box borders stay in the default
+  rendering and are never misrecognized.
+- Unicode wide characters (e.g. CJK ideographs) occupy two visual columns,
+  so line coordinates remain aligned.
+- Empty input emits no layer; grids larger than the safety limits
+  (`--max-rows` / library `Options.MaxRows`, etc.) return an error instead
+  of exhausting memory.
+
+```console
+$ cat flow.txt
++-----+        +-----+
+| SRC |------->| DST |
++-----+        +-----+
+$ ascii2svg --line-color teal --line-width 2.5 < flow.txt
+```
+
+Relevant flags: `--line-color` (named color or `#rgb` hex),
+`--line-width`, plus `--cell-width`, `--cell-height`, `--offset-x` and
+`--offset-y` for aligning the overlay with the monospace text.
+
+The same behavior is available in code through
+`ascii2svg.FromStringWithOptions`, `ascii2svg.ExtractDirections` and
+`ascii2svg.RenderDirectionLayer`.
+
 ## Install
 
 ### Using go
